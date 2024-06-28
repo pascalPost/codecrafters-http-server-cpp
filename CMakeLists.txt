@@ -13,3 +13,4 @@ find_package(ZLIB REQUIRED)
 add_executable(server ${SOURCE_FILES})
 
 target_link_libraries(server PRIVATE Threads::Threads ZLIB::ZLIB)
+target_compile_options(server PRIVATE -Werror -pedantic-errors -Wall -Wextra -Wconversion -Wsign-conversion)

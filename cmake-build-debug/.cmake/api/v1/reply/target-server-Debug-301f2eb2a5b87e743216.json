@@ -11,7 +11,8 @@
 		"commands" : 
 		[
 			"add_executable",
-			"target_link_libraries"
+			"target_link_libraries",
+			"target_compile_options"
 		],
 		"files" : 
 		[
@@ -33,6 +34,12 @@
 				"file" : 0,
 				"line" : 15,
 				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 16,
+				"parent" : 0
 			}
 		]
 	},
@@ -43,6 +50,30 @@
 			[
 				{
 					"fragment" : "-g -std=gnu++23 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fdiagnostics-color=always"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Werror"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-pedantic-errors"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wall"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wextra"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wconversion"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-Wsign-conversion"
 				}
 			],
 			"language" : "CXX",
