@@ -4,13 +4,14 @@
 
 namespace http_server {
 
-Server::Server(const unsigned port, const int connection_backlog) : socket{} {
+Server::Server(const unsigned port, const int connection_backlog)
+    : socket{std::make_unique<Socket>()} {
   socket->set_options();
   socket->bind(port);
   socket->set_listen(connection_backlog);
 }
 
-void Server::accept(const std::string& message) const {
+void Server::accept(const std::string &message) const {
   std::cout << "Waiting for a client to connect...\n";
   const auto connection = socket->accept();
   std::cout << "Client connected\n";
