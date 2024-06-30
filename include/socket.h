@@ -3,29 +3,40 @@
 #include <string>
 
 namespace http_server {
+    class Socket {
+    public:
+        Socket();
 
-class Socket {
-public:
-  Socket();
-  explicit Socket(int file_descriptor);
-  ~Socket();
+        explicit Socket(int file_descriptor);
 
-  Socket(const Socket&) = delete;
-  Socket& operator()(const Socket&) = delete;
+        ~Socket();
 
-  // TODO implement move semantics (e.g. with optional file_descriptor)
-  Socket(Socket&&) noexcept = delete;
-  Socket& operator()(Socket&&) noexcept = delete;
+        Socket(const Socket &) = delete;
 
-  void set_options() const;
-  void bind(unsigned port) const;
-  void set_listen(int connection_backlog = 5) const;
-  [[nodiscard]] Socket accept() const;
-  void write(const std::string& message) const;
-  [[nodiscard]] std::string read() const;
+        Socket &operator()(const Socket &) = delete;
 
-private:
-  int file_descriptor;
-};
 
+        // TODO implement move semantics (e.g. with optional file_descriptor)
+        Socket(Socket &&) noexcept = delete;
+
+        Socket &operator()(Socket &&) noexcept = delete;
+
+
+        void set_options() const;
+
+        void bind(unsigned port) const;
+
+        void connect(const std::string &hostname, unsigned port) const;
+
+        void set_listen(int connection_backlog = 5) const;
+
+        [[nodiscard]] Socket accept() const;
+
+        void write(const std::string &message) const;
+
+        [[nodiscard]] std::string read() const;
+
+    private:
+        int file_descriptor;
+    };
 } // namespace http_server
