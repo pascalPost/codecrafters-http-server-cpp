@@ -22,6 +22,7 @@ public:
   void set_listen(int connection_backlog = 5) const;
   [[nodiscard]] Socket accept() const;
   void write(const std::string& message) const;
+  [[nodiscard]] std::string read() const;
 
 private:
   int file_descriptor;

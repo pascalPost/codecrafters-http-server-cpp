@@ -5,6 +5,7 @@
 #include <iostream>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <bits/posix1_lim.h>
 
 namespace http_server {
 
@@ -74,9 +75,20 @@ Socket Socket::accept() const {
 
 void Socket::write(const std::string &message) const {
   if (::write(file_descriptor, message.c_str(), message.size()) < 0) {
-    throw std::runtime_error("Error in writung response: " +
-                             std::string{strerror(errno)});
+    throw std::runtime_error(std::format("Error in writing message: {}", get_error_description()));
   }
+}
+
+  std::string Socket::read() const {
+  std::array<char, 256> buffer{};
+
+  const auto bytes_received = ::read(file_descriptor, buffer.begin(), buffer.size() -1);
+
+  if (bytes_received < 0) {
+    throw std::runtime_error(std::format("Error in reading message: {}", get_error_description()));
+  }
+
+  return buffer.begin();
 }
 
 } // namespace http_server
