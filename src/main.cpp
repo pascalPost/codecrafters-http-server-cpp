@@ -11,9 +11,9 @@ int main(int, char **) {
     std::cout << "Logs from your program will appear here!\n";
 
     constexpr int port{4221};
-    const http_server::Server server(port);
-
-    server.accept();
+    http_server::Server server(port);
+    server.add_endpoint("/", []() -> std::string { return "HTTP/1.1 200 OK\r\n\r\n"; });
+    server.start();
 
     return EXIT_SUCCESS;
 }

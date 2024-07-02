@@ -13,26 +13,11 @@ namespace http_server {
         socket->set_listen(connection_backlog);
     }
 
-
-    // TODO create proper class and use as a type that is returned from read and also contains the message as a std::string
-    struct http_message {
-        std::string_view headers;
-        std::string_view body;
-    };
-
-    [[nodiscard]] http_message split_http_message(const std::string_view message) {
-        const auto header_body_seperation_position = message.find("\r\n\r\n");
-        if (header_body_seperation_position == std::string_view::npos) {
-            throw std::runtime_error("Invalid HTTP message: no header-body separator found");
-        }
-
-        const std::string_view headers = message.substr(0, header_body_seperation_position);
-        const std::string_view body = message.substr(header_body_seperation_position + 4);
-
-        return {headers, body};
+    void Server::add_endpoint(std::string &&path, std::function<std::string()> &&f) {
+        endpoints.try_emplace(path, f);
     }
 
-    void Server::accept() const {
+    void Server::start() const {
         log<log_level::INFO>("Waiting for a client to connect...");
         const auto connection = socket->accept();
         log<log_level::INFO>("Client connected");
@@ -40,19 +25,20 @@ namespace http_server {
         auto request_message = connection.read();
         log<log_level::DEBUG>("client request:\n{}", request_message);
 
-        http::messages::Request request{std::move(request_message)};
+        const http::messages::Request request{std::move(request_message)};
         const auto request_line = request.request_line();
         const auto target = request_line.request_target();
 
-        std::string message{};
-        if (target == "/") {
-            message = "HTTP/1.1 200 OK\r\n\r\n";
-        } else {
-            message = "HTTP/1.1 404 Not Found\r\n\r\n";
+        std::string response_message = not_found_response;
+        if (const auto entry = endpoints.find(target); entry != endpoints.end()) {
+            response_message = entry->second();
         }
 
+        log<log_level::DEBUG>("sending response:\n{}", response_message);
+        connection.write(response_message);
+    }
 
-        log<log_level::DEBUG>("sending response:\n{}", message);
-        connection.write(message);
+    void Server::set_not_found_message(std::string &&message) {
+        not_found_response = std::move(message);
     }
 } // namespace http_server

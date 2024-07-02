@@ -15,11 +15,14 @@ std::string send(const std::string &address, const unsigned port, const std::str
 
 constexpr int port{4221};
 
+auto server_setup = []() {
+    http_server::Server server(port, 5);
+    server.add_endpoint("/", []() -> std::string { return "HTTP/1.1 200 OK\r\n\r\n"; });
+    server.start();
+};
+
 TEST_CASE("The http server is able to answer a http request from a client") {
-    auto server_process = std::async([]() {
-        const http_server::Server server(port, 5);
-        server.accept();
-    });
+    auto server_process = std::async(server_setup);
 
     auto response = std::async([]() -> std::string {
         sleep(2);
@@ -32,10 +35,7 @@ TEST_CASE("The http server is able to answer a http request from a client") {
 }
 
 TEST_CASE("The http server sends a 404 on an unknown route") {
-    auto server_process = std::async([]() {
-        const http_server::Server server(port, 5);
-        server.accept();
-    });
+    auto server_process = std::async(server_setup);
 
     auto response = std::async([]() -> std::string {
         sleep(2);
