@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <format>
 
 namespace http_server {
     enum class log_level : unsigned char {

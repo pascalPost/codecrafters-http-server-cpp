@@ -6,6 +6,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <format>
 
 namespace http_server {
     void Socket::set_options() const {
