@@ -24,7 +24,7 @@ namespace http_server {
     void log(std::format_string<Args...> fmt, Args &&... args) {
         if (static_cast<unsigned char>(level) <= static_cast<unsigned char>(global_log_level())) {
             auto message = std::format(fmt, std::forward<Args>(args)...);
-            std::println("[{}] : {}", to_string(level), message);
+            std::cout << std::format("[{}] : {}", to_string(level), message) << std::endl;
         }
     }
 }
