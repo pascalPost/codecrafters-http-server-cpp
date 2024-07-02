@@ -1,7 +1,4 @@
 #include "../include/server.h"
-
-#include <iostream>
-
 #include "../include/http.h"
 #include "../include/log.h"
 
@@ -17,7 +14,7 @@ namespace http_server {
         endpoints.try_emplace(path, f);
     }
 
-    void Server::start() const {
+    void Server::accept() const {
         log<log_level::INFO>("Waiting for a client to connect...");
         const auto connection = socket->accept();
         log<log_level::INFO>("Client connected");
@@ -37,6 +34,13 @@ namespace http_server {
         log<log_level::DEBUG>("sending response:\n{}", response_message);
         connection.write(response_message);
     }
+
+     void Server::run() const {
+        while (true) {
+            accept();
+        }
+    }
+
 
     void Server::set_not_found_message(std::string &&message) {
         not_found_response = std::move(message);

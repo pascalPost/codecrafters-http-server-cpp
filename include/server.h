@@ -15,7 +15,9 @@ namespace http_server {
 
         void add_endpoint(std::string &&path, std::function<std::string ()> &&f);
 
-        void start() const;
+        void accept() const;
+
+        [[noreturn]] void run() const;
 
         void set_not_found_message(std::string &&message);
 

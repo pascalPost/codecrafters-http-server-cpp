@@ -20,8 +20,16 @@ namespace http_server::http::messages {
         http_version_view = split[2];
     }
 
+    std::string Request_line::http_method() const {
+        return std::string{http_method_view};
+    }
+
     std::string Request_line::request_target() const {
         return std::string{request_target_view};
+    }
+
+    std::string Request_line::http_version() const {
+        return std::string{http_version_view};
     }
 
     std::string_view Request_line::line() const {
@@ -31,6 +39,14 @@ namespace http_server::http::messages {
 
     Request_line Request::request_line() const {
         return Request_line{std::string{request_line_view}};
+    }
+
+    std::string_view Request::headers() const {
+        return headers_view;
+    }
+
+    std::string_view Request::body() const {
+        return body_view;
     }
 
     Request::Request(std::string &&m): message{m} {
@@ -45,7 +61,8 @@ namespace http_server::http::messages {
         }
 
         request_line_view = std::string_view{message}.substr(0, pos_request_line_end);
-        headers_view = std::string_view{message}.substr(pos_request_line_end + 2, pos_headers_end);
+        headers_view = std::string_view{message}.substr(pos_request_line_end + 2,
+                                                        pos_headers_end - (pos_request_line_end + 2));
         body_view = std::string_view{message}.substr(pos_headers_end + 4);
     }
 }

@@ -34,6 +34,8 @@ namespace http_server::http::messages {
 
         [[nodiscard]] std::string_view headers() const;
 
+        [[nodiscard]] std::string_view body() const;
+
     private:
         std::string message;
         std::string_view request_line_view;

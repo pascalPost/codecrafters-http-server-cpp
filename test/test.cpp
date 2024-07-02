@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 #include <future>
+#include <thread>
 
 #include "../include/helper.h"
 #include "../include/server.h"
@@ -18,7 +19,7 @@ constexpr int port{4221};
 auto server_setup = []() {
     http_server::Server server(port, 5);
     server.add_endpoint("/", []() -> std::string { return "HTTP/1.1 200 OK\r\n\r\n"; });
-    server.start();
+    server.accept();
 };
 
 TEST_CASE("The http server is able to answer a http request from a client") {

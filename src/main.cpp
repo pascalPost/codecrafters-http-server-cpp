@@ -13,7 +13,7 @@ int main(int, char **) {
     constexpr int port{4221};
     http_server::Server server(port);
     server.add_endpoint("/", []() -> std::string { return "HTTP/1.1 200 OK\r\n\r\n"; });
-    server.start();
+    server.run();
 
     return EXIT_SUCCESS;
 }

@@ -12,5 +12,10 @@ TEST_CASE("http request parsing") {
     const auto request_line = request.request_line();
 
     REQUIRE(request_line.line() == "GET /index.html HTTP/1.1");
+    REQUIRE(request_line.http_method() == "GET");
     REQUIRE(request_line.request_target() == "/index.html");
+    REQUIRE(request_line.http_version() == "HTTP/1.1");
+
+    REQUIRE(request.headers() == "Host: localhost:4221\r\nUser-Agent: curl/7.64.1\r\nAccept: */*");
+    REQUIRE(request.body().empty());
 }
