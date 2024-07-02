@@ -1,7 +1,7 @@
-#include "../include/http.h"
-
-#include "../include/server.h"
 #include "catch2/catch_test_macros.hpp"
+
+#include "../include/http.h"
+#include "../include/server.h"
 
 TEST_CASE("http request parsing") {
     std::string http_message{
