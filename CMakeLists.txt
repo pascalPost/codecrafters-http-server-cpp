@@ -9,6 +9,7 @@ set(SOURCE_FILES
         src/helper.cpp
         src/log.cpp
         src/http.cpp
+        src/url.cpp
 )
 
 set(CMAKE_CXX_STANDARD 23)
@@ -40,7 +41,7 @@ FetchContent_MakeAvailable(Catch2)
 add_executable(tests
         test/test.cpp
         test/http.cpp
-        test/routing.cpp
+        test/url.cpp
 )
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain httpCom)
 

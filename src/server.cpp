@@ -10,8 +10,9 @@ namespace http_server {
         socket->set_listen(connection_backlog);
     }
 
-    void Server::add_endpoint(std::string &&path, std::function<std::string()> &&f) {
-        endpoints.try_emplace(path, f);
+    void Server::add_endpoint(std::string &&path,
+                              std::function<std::string(std::unordered_map<std::string, std::string>)> &&f) {
+        endpoints.try_emplace(Url{path}, f);
     }
 
     void Server::accept() const {
@@ -27,15 +28,17 @@ namespace http_server {
         const auto target = request_line.request_target();
 
         std::string response_message = not_found_response;
-        if (const auto entry = endpoints.find(target); entry != endpoints.end()) {
-            response_message = entry->second();
+        for (const auto &[url, func]: endpoints) {
+            if (auto res = Url{url}.match(target); res) {
+                response_message = func(*res);
+            }
         }
 
         log<log_level::DEBUG>("sending response:\n{}", response_message);
         connection.write(response_message);
     }
 
-     void Server::run() const {
+    void Server::run() const {
         while (true) {
             accept();
         }
