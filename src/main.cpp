@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <format>
 
 int main(int, char **) {
     // Flush after every std::cout / std::cerr
