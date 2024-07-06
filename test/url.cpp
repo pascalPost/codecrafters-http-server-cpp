@@ -3,7 +3,6 @@
 #include <regex>
 #include <vector>
 #include <string>
-#include <unordered_map>
 
 #include "../include/url.h"
 
@@ -19,10 +18,9 @@ TEST_CASE("url pattern detection") {
 
 TEST_CASE("url pattern matching") {
     const http_server::Url url{"/echo/{param}"};
-    using ResT = http_server::Url::MatchT::value_type;
-    REQUIRE(url.match("/echo/hello") == ResT{{"param", "hello"}});
-    REQUIRE(url.match("/echo/world") == ResT{{"param", "world"}});
-    REQUIRE(url.match("/echo/special-characters_~.") == ResT{{"param", "special-characters_~."}});
-    REQUIRE(url.match("/echo/hello/world") == std::nullopt);
-    REQUIRE(url.match("/echo/hello/") == std::nullopt);
+    REQUIRE(url.match("/echo/hello").value().get("param") == "hello");
+    REQUIRE(url.match("/echo/world").value().get("param") == "world");
+    REQUIRE(url.match("/echo/special-characters_~.").value().get("param") == "special-characters_~.");
+    REQUIRE_FALSE(url.match("/echo/hello/world").has_value());
+    REQUIRE_FALSE(url.match("/echo/hello/").has_value());
 }

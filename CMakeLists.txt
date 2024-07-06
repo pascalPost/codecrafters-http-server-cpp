@@ -10,6 +10,7 @@ set(SOURCE_FILES
         src/log.cpp
         src/http.cpp
         src/url.cpp
+        src/endpoint-input.cpp
 )
 
 set(CMAKE_CXX_STANDARD 23)

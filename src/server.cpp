@@ -1,6 +1,7 @@
 #include "../include/server.h"
 #include "../include/http.h"
 #include "../include/log.h"
+#include "../include/endpoint-input.h"
 
 namespace http_server {
     Server::Server(const unsigned port, const int connection_backlog)
@@ -11,7 +12,7 @@ namespace http_server {
     }
 
     void Server::add_endpoint(std::string &&path,
-                              std::function<std::string(std::unordered_map<std::string, std::string>)> &&f) {
+                              std::function<std::string(const Endpoint_input &)> &&f) {
         endpoints.try_emplace(Url{path}, f);
     }
 
@@ -29,8 +30,8 @@ namespace http_server {
 
         std::string response_message = not_found_response;
         for (const auto &[url, func]: endpoints) {
-            if (auto res = Url{url}.match(target); res) {
-                response_message = func(*res);
+            if (const auto &url_pattern_on_match = Url{url}.match(target); url_pattern_on_match) {
+                response_message = func(Endpoint_input{request, *url_pattern_on_match});
             }
         }
 

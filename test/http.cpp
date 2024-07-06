@@ -16,6 +16,9 @@ TEST_CASE("http request parsing") {
     REQUIRE(request_line.request_target() == "/index.html");
     REQUIRE(request_line.http_version() == "HTTP/1.1");
 
-    REQUIRE(request.headers() == "Host: localhost:4221\r\nUser-Agent: curl/7.64.1\r\nAccept: */*");
+    REQUIRE(request.headers().content() == "Host: localhost:4221\r\nUser-Agent: curl/7.64.1\r\nAccept: */*");
+    REQUIRE(request.headers().field_value("Host").value() == "localhost:4221");
+    REQUIRE(request.headers().field_value("User-Agent").value() == "curl/7.64.1");
+    REQUIRE(request.headers().field_value("Accept").value() == "*/*");
     REQUIRE(request.body().empty());
 }

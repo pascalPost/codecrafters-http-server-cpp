@@ -6,13 +6,25 @@
 #include <vector>
 
 namespace http_server {
+    class UrlPattern {
+    public:
+        explicit UrlPattern(std::unordered_map<std::string, std::string> &&);
+
+        [[nodiscard]] std::optional<std::string> get(const std::string &pattern) const;
+
+    private:
+        std::unordered_map<std::string, std::string> pattern_map_;
+
+        friend bool operator==(const UrlPattern &, const UrlPattern &);
+    };
+
+    bool operator==(const UrlPattern &lhs, const UrlPattern &rhs);
+
     class Url {
     public:
-        using MatchT = std::optional<std::unordered_map<std::string, std::string> >;
-
         explicit Url(const std::string &url);
 
-        [[nodiscard]] MatchT match(const std::string &url) const;
+        [[nodiscard]] std::optional<UrlPattern> match(const std::string &url) const;
 
         [[nodiscard]] std::string data() const noexcept { return url; }
 

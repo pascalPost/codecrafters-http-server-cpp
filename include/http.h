@@ -1,8 +1,9 @@
 #pragma once
 
-#include <stdexcept>
+#include <optional>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 
 
 namespace http_server::http::messages {
@@ -25,6 +26,19 @@ namespace http_server::http::messages {
         std::string_view http_version_view;
     };
 
+    class Headers {
+    public:
+        explicit Headers(std::string_view content);
+
+        [[nodiscard]] std::optional<std::string> field_value(const std::string &field_name);
+
+        [[nodiscard]] std::string content() { return content_; }
+
+    private:
+        std::string content_;
+        std::unordered_map<std::string, std::string> data_;
+    };
+
 
     class Request {
     public:
@@ -32,7 +46,7 @@ namespace http_server::http::messages {
 
         [[nodiscard]] Request_line request_line() const;
 
-        [[nodiscard]] std::string_view headers() const;
+        [[nodiscard]] Headers headers() const;
 
         [[nodiscard]] std::string_view body() const;
 
