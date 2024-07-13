@@ -46,9 +46,9 @@ int main(const int args, const char *const argv[]) {
 
     if (config.directory()) {
         std::filesystem::path dir{*config.directory()};
-        server.add_endpoint("/files/{filename}", [&dir](const auto &data) -> std::string {
+        server.add_endpoint("/files/{filename}", [dir = std::move(dir)](const auto &data) -> std::string {
             const auto filename = data.url_pattern().get("filename").value_or("");
-            const auto file = dir.append(filename);
+            const auto file = dir / filename;
 
             if (!std::filesystem::exists(file)) {
                 return "HTTP/1.1 404 Not Found\r\n\r\n";
