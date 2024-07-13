@@ -62,7 +62,7 @@ const auto server_setup = []() {
             "\r\n"
             "{}", file_content.size(), file_content.data());
     });
-    server.accept();
+    server.respond(server.accept());
 };
 
 TEST_CASE("The http server is able to answer a http request from a client") {
