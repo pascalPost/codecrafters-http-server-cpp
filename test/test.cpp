@@ -3,8 +3,9 @@
 #include <unistd.h>
 #include <future>
 #include <thread>
+#include <filesystem>
+#include <fstream>
 
-#include "../include/helper.h"
 #include "../include/server.h"
 #include "../include/http.h"
 
@@ -17,7 +18,7 @@ std::string send(const std::string &address, const unsigned port, const std::str
 
 constexpr int port{4221};
 
-auto server_setup = []() {
+const auto server_setup = []() {
     http_server::Server server(port, 5);
     server.add_endpoint("/", [](const auto &) -> std::string { return "HTTP/1.1 200 OK\r\n\r\n"; });
     server.add_endpoint("/echo/{str}", [](const auto &data) -> std::string {
@@ -40,6 +41,27 @@ auto server_setup = []() {
             "{}", agent.size(),
             agent);
     });
+
+    const std::filesystem::path source_file_path{__FILE__};
+    const auto dir = source_file_path.parent_path() / "data";
+    server.add_endpoint("/files/{filename}", [&dir](const auto &data) -> std::string {
+        const auto filename = data.url_pattern().get("filename").value();
+        const auto file = dir / filename;
+
+        if (!std::filesystem::exists(file)) {
+            return "HTTP/1.1 404 Not Found\r\n\r\n";
+        }
+
+        std::ifstream is(file, std::ios::binary);
+        const std::vector<char> file_content((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
+
+        return std::format(
+            "HTTP/1.1 200 OK\r\n"
+            "Content-Type: application/octet-stream\r\n"
+            "Content-Length: {}\r\n"
+            "\r\n"
+            "{}", file_content.size(), file_content.data());
+    });
     server.accept();
 };
 
@@ -53,7 +75,7 @@ TEST_CASE("The http server is able to answer a http request from a client") {
 
     client_process.wait();
     const std::string response_message = client_process.get();
-    REQUIRE(response_message.starts_with("HTTP/1.1 200 OK"));
+    REQUIRE(response_message == "HTTP/1.1 200 OK\r\n\r\n");
 }
 
 TEST_CASE("The http server sends a 404 on an unknown route") {
@@ -66,7 +88,7 @@ TEST_CASE("The http server sends a 404 on an unknown route") {
 
     client_process.wait();
     const std::string response_message = client_process.get();
-    REQUIRE(response_message.starts_with("HTTP/1.1 404 Not Found"));
+    REQUIRE(response_message == "HTTP/1.1 404 Not Found\r\n\r\n");
 }
 
 TEST_CASE("The http server is able to match url pattern and use them in a response") {
@@ -79,7 +101,7 @@ TEST_CASE("The http server is able to match url pattern and use them in a respon
 
     client_process.wait();
     const std::string response_message = client_process.get();
-    REQUIRE(response_message.starts_with("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 3\r\n\r\nabc"))
+    REQUIRE(response_message == "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 3\r\n\r\nabc")
     ;
 }
 
@@ -98,6 +120,38 @@ TEST_CASE("The http server is able to read a request header and use its content 
 
     client_process.wait();
     const std::string response_message = client_process.get();
-    REQUIRE(response_message.starts_with("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 3\r\n\r\nabc"))
+    REQUIRE(response_message == "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nfoobar/1.2.3")
     ;
+}
+
+TEST_CASE("The http server is able to share files") {
+    SECTION("existing file") {
+        auto server_process = std::async(server_setup);
+
+        auto client_process = std::async([]() -> std::string {
+            sleep(2);
+            return send("localhost", port, "GET /files/test HTTP/1.1\r\n\r\n");
+        });
+
+        client_process.wait();
+        const std::string response_message = client_process.get();
+        REQUIRE(
+            response_message ==
+            "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 13\r\n\r\nHello, World!")
+        ;
+    }
+
+    SECTION("non-existing file") {
+        auto server_process = std::async(server_setup);
+
+        auto client_process = std::async([]() -> std::string {
+            sleep(2);
+            return send("localhost", port, "GET /files/non-existing-file HTTP/1.1\r\n\r\n");
+        });
+
+        client_process.wait();
+        const std::string response_message = client_process.get();
+        REQUIRE(response_message == "HTTP/1.1 404 Not Found\r\n\r\n")
+        ;
+    }
 }

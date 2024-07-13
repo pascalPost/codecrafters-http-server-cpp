@@ -11,6 +11,7 @@ set(SOURCE_FILES
         src/http.cpp
         src/url.cpp
         src/endpoint-input.cpp
+        src/config.cpp
 )
 
 set(CMAKE_CXX_STANDARD 23)
@@ -43,6 +44,7 @@ add_executable(tests
         test/test.cpp
         test/http.cpp
         test/url.cpp
+        test/config.cpp
 )
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain httpCom)
 
