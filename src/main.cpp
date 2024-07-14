@@ -47,7 +47,7 @@ int main(const int args, const char *const argv[]) {
 
     if (config.directory()) {
         std::filesystem::path dir{*config.directory()};
-        server.add_endpoint("GET", "/files/{filename}", [dir = std::move(dir)](const auto &data) -> std::string {
+        server.add_endpoint("GET", "/files/{filename}", [dir](const auto &data) -> std::string {
             const auto filename = data.url_pattern().get("filename").value_or("");
             const auto file = dir / filename;
 
@@ -66,25 +66,18 @@ int main(const int args, const char *const argv[]) {
                 "\r\n"
                 "{}", file_content.size(), file_content.data());
         });
-
-        server.add_endpoint("POST", "/files/{filename}", [dir = std::move(dir)](const auto &data) -> std::string {
-            const auto filename = data.url_pattern().get("filename").value_or("");
+        server.add_endpoint("POST", "/files/{filename}", [dir](const auto &data) -> std::string {
+            const auto filename = data.url_pattern().get("filename").value();
             const auto file = dir / filename;
 
-            if (!std::filesystem::exists(file)) {
-                return "HTTP/1.1 404 Not Found\r\n\r\n";
+            if (std::filesystem::exists(file)) {
+                return "HTTP/1.1 400 Bad Request\r\n\r\n";
             }
 
-            std::ifstream is(file, std::ios::binary);
-            const std::vector<char> file_content((std::istreambuf_iterator<char>(is)),
-                                                 std::istreambuf_iterator<char>());
+            std::ofstream os{file};
+            os << data.request().body();
 
-            return std::format(
-                "HTTP/1.1 200 OK\r\n"
-                "Content-Type: application/octet-stream\r\n"
-                "Content-Length: {}\r\n"
-                "\r\n"
-                "{}", file_content.size(), file_content.data());
+            return "HTTP/1.1 201 Created\r\n\r\n";
         });
     }
 
