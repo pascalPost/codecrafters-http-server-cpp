@@ -8,7 +8,7 @@
 
 namespace http_server {
     extern std::pair<std::vector<std::string>, std::string> transformBracedExpressions(
-        const std::string &url, std::string_view insert_regex = "([a-zA-Z0-9-_~.]+)");
+        std::string_view url, std::string_view insert_regex = "([a-zA-Z0-9-_~.]+)");
 }
 
 TEST_CASE("url pattern detection") {

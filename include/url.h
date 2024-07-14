@@ -22,9 +22,9 @@ namespace http_server {
 
     class Url {
     public:
-        explicit Url(const std::string &url);
+        explicit Url(std::string_view url);
 
-        [[nodiscard]] std::optional<UrlPattern> match(const std::string &url) const;
+        [[nodiscard]] std::optional<UrlPattern> match(std::string_view url) const;
 
         [[nodiscard]] std::string data() const noexcept { return url; }
 

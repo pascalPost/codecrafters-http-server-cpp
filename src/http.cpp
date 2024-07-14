@@ -5,6 +5,24 @@
 #include <string_view>
 
 namespace http_server::http::messages {
+    static constexpr std::array<std::string_view, method::count> method_names{
+        "GET", "HEAD",
+        "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"
+    };
+
+    Method from_string(const std::string_view method) {
+        if (const auto it = std::ranges::find(method_names, method); it != std::cend(method_names)) {
+            const auto i = std::distance(std::cbegin(method_names), it);
+            return static_cast<Method>(i);
+        }
+
+        throw std::runtime_error("unknown http method encountered.");
+    }
+
+    method::enum_type get_index(Method method) noexcept {
+        return static_cast<method::enum_type>(method);
+    }
+
     Request_line::Request_line(std::string &&line): data{std::move(line)} {
         std::vector<std::string_view> split;
         split.reserve(3);
@@ -21,8 +39,8 @@ namespace http_server::http::messages {
         http_version_view = split[2];
     }
 
-    std::string Request_line::http_method() const {
-        return std::string{http_method_view};
+    Method Request_line::http_method() const {
+        return from_string(http_method_view);
     }
 
     std::string Request_line::request_target() const {

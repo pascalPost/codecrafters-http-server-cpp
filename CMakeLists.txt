@@ -12,6 +12,7 @@ set(SOURCE_FILES
         src/url.cpp
         src/endpoint-input.cpp
         src/config.cpp
+        src/endpoints.cpp
 )
 
 set(CMAKE_CXX_STANDARD 23)

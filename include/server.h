@@ -1,15 +1,11 @@
 #pragma once
 
 #include <functional>
-#include <unordered_map>
 #include <memory>
-
-#include "endpoint-input.h"
-#include "socket.h"
-#include "url.h"
+#include "../include/socket.h"
 
 namespace http_server {
-    class Socket;
+    class Endpoints;
     class Endpoint_input;
 
     /// Server provides functions to allow http communication.
@@ -18,9 +14,11 @@ namespace http_server {
         /// Server is constructed given a port and optionally a connection backlog.
         explicit Server(unsigned port, int connection_backlog = 5);
 
-        /// add_endpoint allows to specify a function to be called on the given path.
-        void add_endpoint(std::string &&path,
-                          std::function<std::string(const Endpoint_input &)> &&f);
+        /// add_endpoint allows to specify a function to be called on the given path and http method.
+        void add_endpoint(
+            std::string_view method,
+            std::string_view path,
+            std::function<std::string(const Endpoint_input &)> &&f) const;
 
         /// run the server starts a non returning loop accepting and responing to incoming requests.
         [[noreturn]] void run() const;
@@ -35,8 +33,8 @@ namespace http_server {
         void respond(Socket &&) const;
 
     private:
-        std::unique_ptr<Socket> socket;
-        std::unordered_map<Url, std::function<std::string(const Endpoint_input &)> > endpoints;
+        Socket socket;
+        std::unique_ptr<Endpoints> endpoints;
         std::string not_found_response{"HTTP/1.1 404 Not Found\r\n\r\n"};
     };
 }

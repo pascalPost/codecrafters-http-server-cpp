@@ -1,17 +1,42 @@
 #pragma once
 
+#include <algorithm>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 
+#include "http.h"
+
 
 namespace http_server::http::messages {
+    namespace method {
+        using enum_type = u_int8_t;
+
+        static constexpr int count{9};
+    }
+
+    enum class Method : method::enum_type {
+        GET,
+        HEAD,
+        POST,
+        PUT,
+        DELETE,
+        CONNECT,
+        OPTIONS,
+        TRACE,
+        PATCH
+    };
+
+    [[nodiscard]] Method from_string(std::string_view method);
+
+    [[nodiscard]] method::enum_type get_index(Method method) noexcept;
+
     class Request_line {
     public:
         explicit Request_line(std::string &&data);
 
-        [[nodiscard]] std::string http_method() const;
+        [[nodiscard]] Method http_method() const;
 
         [[nodiscard]] std::string request_target() const;
 

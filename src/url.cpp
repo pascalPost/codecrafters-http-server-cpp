@@ -8,11 +8,11 @@
 #include <ranges>
 
 namespace http_server {
-    [[nodiscard]] std::vector<std::string> parseBracedExpressions(const std::string &url) {
+    [[nodiscard]] std::vector<std::string> parseBracedExpressions(const std::string_view url) {
         std::vector<std::string> result;
         const std::regex braced_expr(R"(\{([^\}]+)\})");
-        std::smatch match;
-        auto searchStart(url.cbegin());
+        std::match_results<std::string_view::const_iterator> match;
+        auto searchStart{url.cbegin()};
 
         while (std::regex_search(searchStart, url.cend(), match, braced_expr)) {
             result.push_back(match[1].str());
@@ -22,11 +22,11 @@ namespace http_server {
         return result;
     }
 
-    [[nodiscard]] std::string replaceBracedExpressionsWithRegex(const std::string &url,
+    [[nodiscard]] std::string replaceBracedExpressionsWithRegex(const std::string_view url,
                                                                 const std::vector<std::string> &expressions,
                                                                 const std::string_view insert_regex =
                                                                         "([a-zA-Z0-9-_~.]+)") {
-        std::string result = url;
+        std::string result = std::string{url};
         const std::regex braced_expr(R"(\{[^\}]+\})");
 
         for ([[maybe_unused]] const auto &expr: expressions) {
@@ -38,7 +38,7 @@ namespace http_server {
     }
 
     [[nodiscard]] std::pair<std::vector<std::string>, std::string> transformBracedExpressions(
-        const std::string &url, const std::string_view insert_regex = "([a-zA-Z0-9-_~.]+)") {
+        const std::string_view url, const std::string_view insert_regex = "([a-zA-Z0-9-_~.]+)") {
         std::vector<std::string> expressions = parseBracedExpressions(url);
         auto transformed_url = replaceBracedExpressionsWithRegex(url, expressions, insert_regex);
         return std::make_pair(std::move(expressions), std::move(transformed_url));
@@ -63,14 +63,15 @@ namespace http_server {
         return lhs.pattern_map_ == rhs.pattern_map_;
     }
 
-    Url::Url(const std::string &url) {
+    Url::Url(const std::string_view url) {
         auto [expressions, transformed_url] = transformBracedExpressions(url);
         this->url = std::move(transformed_url);
         matchers = std::move(expressions);
     }
 
-    std::optional<UrlPattern> Url::match(const std::string &url) const {
-        if (std::smatch match; std::regex_match(url, match, std::regex{this->url})) {
+    std::optional<UrlPattern> Url::match(const std::string_view url) const {
+        const std::string url_str{url};
+        if (std::smatch match; std::regex_match(url_str, match, std::regex{this->url})) {
             std::unordered_map<std::string, std::string> pattern_mapping{};
             pattern_mapping.reserve(matchers.size());
 
